@@ -1,28 +1,4 @@
-# Must use a Cuda version 11+
-FROM pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
-
-WORKDIR /
-
-# Install git
-RUN apt-get update && apt-get install -y git
-
-# Install python packages
-RUN pip3 install --upgrade pip
-ADD requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
-
-# We add the banana boilerplate here
-ADD server.py .
-
-# Add your model weight files 
-# (in this case we have a python script)
-ADD download.py .
-RUN python3 download.py
-
-
-# Add your custom app code, init() and inference()
-ADD app.py .
-
-EXPOSE 8000
-
-CMD python3 -u server.py
+FROM r8.im/deforum-art/deforum-stable-diffusion@sha256:652b0fed80b8c0845b20de06f877115f56b70b2136d02db95f163eff4b95e35d
+RUN mkdir /adapter && cd /adapter && wget https://github.com/Hades32/banana-cog-adapter/releases/download/v0.0.7/cog-adapter && chmod +x cog-adapter
+ENTRYPOINT ["/adapter/cog-adapter"]
+CMD ["python","-m","cog.server.http"]
